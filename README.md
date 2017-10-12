@@ -1,5 +1,5 @@
 
-RISC-V CPU Described in Chisel 2.2 for Implementation in an FPGA
+<b>RISC-V CPU Described in Chisel 2.2 for Implementation in an FPGA</b>
 
 This repository contains the files accociated with the design a soft RISC-V processor optimized for speed and area for the 
 Altera DE2-115 architecture. The hardware of a 5-stage pipelined single-issue 64-bit version of the RISC-V microprocessor
