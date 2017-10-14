@@ -32,18 +32,13 @@ object Constants {
   val ALUCTL_AND = UInt(0)  // AND, ALUctl = 0000
   val ALUCTL_OR = UInt(1)   // OR, ALUctl = 0001
   val ALUCTL_ADD = UInt(2)  // Add, ALUctl = 0010
+  val ALUCTL_SLL = UInt(3)  // SLL, ALUctl = 0011
+  val ALUCTL_SRL = UInt(4)  // SRL, ALUctl = 0100
+  val ALUCTL_SRA = UInt(5)  // SRA, ALUctl = 0101
   val ALUCTL_SUB = UInt(6)  // Subtract, ALUctl = 0110
   val ALUCTL_SLT = UInt(7)  // Set less than, ALUctl = 0111
+  val ALUCTL_SLTU = UInt(8) // SLTU, ALUctl = 0101
+  val ALUCTL_XOR = UInt(9)  // XOR, ALUctl = 0101
   val ALUCTL_NOR = UInt(12) // NOR, ALUctl = 1100
   
-//  val ALUOP_LD_SD = UInt(0)      // ALUop for load/store doubleword
-//  val ALUOP_BEQ = UInt(1)        // ALUop for branch if equal
-//  val ALUOP_ARITHMETIC = UInt(2) // ALUop for arithmetic operation (add, sub, AND, OR)
-//  
-//  val FUNCT3_ALU_ADD_SUB = UInt(0) // Funct3 for add and subtract
-//  val FUNCT3_ALU_AND = UInt(7)     // Funct3 for AND
-//  val FUNCT3_ALU_OR = UInt(6)      // Funct3 for OR
-//  
-//  val FUNCT7_ALU_ADD_AND_OR = UInt(0) // Funct7 for add, AND, OR
-//  val FUNCT7_ALU_SUB = UInt(32)        // Funct7 for subtract
 }

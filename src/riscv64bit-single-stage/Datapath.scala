@@ -5,7 +5,7 @@ import Chisel._
 import Constants._
 
 class Datapath extends Module {
-  // Inputs are from Controlpath
+  // Inputs are from Control
   val io = new Bundle {
     val ALUctl = UInt(INPUT, 4) // Input from ALU control
     val PCSrc = UInt(INPUT, 1)
@@ -21,6 +21,8 @@ class Datapath extends Module {
     
     // Outputs for testing:
     val instructionOut = UInt(OUTPUT, INSTRUCTION_WIDTH)
+    val immediateOut = UInt(OUTPUT, DATA_WIDTH)
+    val instruction0Out = UInt(OUTPUT, INSTRUCTION_WIDTH)
     val instruction1Out = UInt(OUTPUT, INSTRUCTION_WIDTH)
     val instruction2Out = UInt(OUTPUT, INSTRUCTION_WIDTH)
     val instruction3Out = UInt(OUTPUT, INSTRUCTION_WIDTH)
@@ -30,7 +32,6 @@ class Datapath extends Module {
     val instruction7Out = UInt(OUTPUT, INSTRUCTION_WIDTH)
     val instruction8Out = UInt(OUTPUT, INSTRUCTION_WIDTH)
     val instruction9Out = UInt(OUTPUT, INSTRUCTION_WIDTH)
-    val instruction10Out = UInt(OUTPUT, INSTRUCTION_WIDTH)
     val register0Out = UInt(OUTPUT, DATA_WIDTH)
     val register1Out = UInt(OUTPUT, DATA_WIDTH)
     val register2Out = UInt(OUTPUT, DATA_WIDTH)
@@ -45,47 +46,41 @@ class Datapath extends Module {
   
   // INSTRUCTION FETCH:  
   
-  // PCmux output wire
-  val pc_next = Wire(UInt(width = INSTRUCTION_WIDTH))
   // PCmux input wires
   val pc_incremented = Wire(UInt(width = INSTRUCTION_WIDTH))
   val pc_BranchAddrCalc = Wire(UInt(width = INSTRUCTION_WIDTH))
-  pc_BranchAddrCalc := UInt(0) // Default value
-  // PCmux
-  when (io.PCSrc === UInt(1)) {
-    pc_next := pc_BranchAddrCalc
-  } .otherwise {
-    pc_next := pc_incremented
-  } 
   // PC Register
   val pc_register = Reg(init = UInt(0, PC_SIZE))
-  pc_register := pc_next
+  // PCmux
+  when (io.PCSrc === UInt(1)) {
+    pc_register := pc_BranchAddrCalc
+  } .otherwise {
+    pc_register := pc_incremented
+  }
   // PC Adder
   pc_incremented := pc_register + UInt(1)
-  // Instruction Memory
-  val instructionMemory = Vec(Array(UInt(51, INSTRUCTION_WIDTH), UInt(51, INSTRUCTION_WIDTH), // add x0, x0, x0  Two nop instructions needed here for it to work?
-                                         //  |  immediate  | rs1 |fu3| rd  |opcode | 
-      UInt(1048723 , INSTRUCTION_WIDTH), // = 0000000 00001 00000 000 00001 0010011 = addi x1, x0, 1
-                                         //  |  immediate  | rs1 |fu3| rd  |opcode | 
-      UInt(2097427 , INSTRUCTION_WIDTH), // = 0000000 00010 00000 000 00010 0010011 = addi x2, x0, 2
-                                         //  |  immediate  | rs1 |fu3| rd  |opcode | 
-      UInt(3146131 , INSTRUCTION_WIDTH), // = 0000000 00011 00000 000 00011 0010011 = addi x3, x0, 3
-                                         //  |  fu7  | rs2 | rs1 |fu3| rd  |opcode | 
-      UInt(2130483 , INSTRUCTION_WIDTH), // = 0000000 00010 00001 000 00100 0110011 = add  x4, x1, x2
-                                         //  |  imm  | rs2 | rs1 |fu3| imm |opcode |
-      UInt(4206627 , INSTRUCTION_WIDTH), // = 0000000 00100 00000 011 00000 0100011 = sd   x4, 0(x0)
-                                         //  |  immediate  | rs1 |fu3| rd  |opcode |
-      UInt(531     , INSTRUCTION_WIDTH), // = 0000000 00000 00000 000 00100 0010011 = addi x4, x0, 0
-                                         //  |  immediate  | rs1 |fu3| rd  |opcode |
-      UInt(12803   , INSTRUCTION_WIDTH), // = 0000000 00000 00000 011 00100 0000011 = ld   x4, 0(x0)
-                                         //  |  imm  | rs2 | rs1 |fu3| imm |opcode |
-      UInt(3278307 , INSTRUCTION_WIDTH), // = 0000000 00011 00100 000 01011 1100011 = beq  x4, x3, 11
-                                         //  |  immediate  | rs1 |fu3| rd  |opcode |
-      UInt(10487059, INSTRUCTION_WIDTH), // = 0000000 01010 00000 000 01010 0010011 = addi x10, x0, 10
-                                         //  |  immediate  | rs1 |fu3| rd  |opcode |
-      UInt(11535763, INSTRUCTION_WIDTH)  // = 0000000 01011 00000 000 01011 0010011 = addi x11, x0, 11
+  // Instruction Memory                                                      |  immediate  | rs1 |fu3| rd  |opcode | 0
+  val instructionMemory = Vec(Array(UInt(1048723   , INSTRUCTION_WIDTH), // = 0000000 00001 00000 000 00001 0010011 = addi x1, x0, 1
+                                           //  |  immediate  | rs1 |fu3| rd  |opcode | 1
+      UInt(2097427   , INSTRUCTION_WIDTH), // = 0000000 00010 00000 000 00010 0010011 = addi x2, x0, 2
+                                           //  |  immediate  | rs1 |fu3| rd  |opcode | 2
+      UInt(3146131   , INSTRUCTION_WIDTH), // = 0000000 00011 00000 000 00011 0010011 = addi x3, x0, 3
+                                           //  |  fu7  | rs2 | rs1 |fu3| rd  |opcode | 3
+      UInt(2130483   , INSTRUCTION_WIDTH), // = 0000000 00010 00001 000 00100 0110011 = add  x4, x1, x2
+                                           //  |  imm  | rs2 | rs1 |fu3| imm |opcode | 4
+      UInt(4206627   , INSTRUCTION_WIDTH), // = 0000000 00100 00000 011 00000 0100011 = sd   x4, 0(x0)
+                                           //  |  immediate  | rs1 |fu3| rd  |opcode | 5
+      UInt(531       , INSTRUCTION_WIDTH), // = 0000000 00000 00000 000 00100 0010011 = addi x4, x0, 0
+                                           //  |  immediate  | rs1 |fu3| rd  |opcode | 6
+      UInt(12803     , INSTRUCTION_WIDTH), // = 0000000 00000 00000 011 00100 0000011 = ld   x4, 0(x0)
+                                           //  |  imm  | rs2 | rs1 |fu3| imm |opcode | 7
+      UInt(3277411   , INSTRUCTION_WIDTH), // = 0000000 00011 00100 000 00100 1100011 = beq  x4, x3, 2
+                                           //  |  immediate  | rs1 |fu3| rd  |opcode | 8
+      UInt(10487059  , INSTRUCTION_WIDTH), // = 0000000 01010 00000 000 01010 0010011 = addi x10, x0, 10
+                                           //  |  immediate  | rs1 |fu3| rd  |opcode | 9
+      UInt(11535763  , INSTRUCTION_WIDTH)  // = 0000000 01011 00000 000 01011 0010011 = addi x11, x0, 11
       ))
-  val instruction = instructionMemory(pc_next)
+  val instruction = instructionMemory(pc_register)
   
   
   // INSTRUCTION DECODE:
@@ -103,12 +98,11 @@ class Datapath extends Module {
   when(instructionOpcode === OPCODE_S) { // S-type
     immediate := Cat(instruction(31, 25), instruction(11, 7))
   } .elsewhen(instructionOpcode === OPCODE_SB) { // SB-type
-    immediate := Cat(instruction(31, 25), instruction(11, 7))
-    pc_BranchAddrCalc := Cat(instruction(31, 25), instruction(11, 7))
+    immediate := Cat(instruction(31), instruction(7), instruction(30,25), instruction(11,8))
   } .elsewhen(instructionOpcode === OPCODE_U_1 || instructionOpcode === OPCODE_U_2) { // U-type
     immediate := instruction(31, 12)
   } .elsewhen(instructionOpcode === OPCODE_UJ) { // UJ-type
-    immediate := instruction(31, 12)
+    immediate := Cat(instruction(31), instruction(19,12), instruction(20), instruction(30,21))
   } .otherwise { // I-type (or R-type)
     immediate := instruction(31, 20)
   } 
@@ -139,17 +133,18 @@ class Datapath extends Module {
     is(ALUCTL_AND) { alu_result := rs1Data & aluOperand2 } // AND, ALUctl = 0000
     is(ALUCTL_OR) { alu_result := rs1Data | aluOperand2 } // OR, ALUctl = 0001
     is(ALUCTL_ADD) { alu_result := rs1Data + aluOperand2 } // Add, ALUctl = 0010
-    is(ALUCTL_SUB) { // Subtract, ALUctl = 0110
-      alu_result := rs1Data - aluOperand2
-      when (alu_result === UInt(0)) {
+    is(ALUCTL_SUB) { alu_result := rs1Data - aluOperand2 } // Subtract, ALUctl = 0110
+    is(ALUCTL_SLT) { alu_result := rs1Data < aluOperand2 } // Set less than, ALUctl = 0111
+    is(ALUCTL_NOR) { alu_result := ~(rs1Data | aluOperand2) } // NOR, ALUctl = 1100
+    is(ALUCTL_XOR) { alu_result := rs1Data ^ aluOperand2 } // XOR, ALUctl = 0101
+  }
+  when (alu_result === UInt(0)) {
         io.ALUzero := UInt(1)
       } .otherwise {
         io.ALUzero := UInt(0)
       }
-    }
-    is(ALUCTL_SLT) { alu_result := rs1Data < aluOperand2 } // Set less than, ALUctl = 0111
-    is(ALUCTL_NOR) { alu_result := ~(rs1Data | aluOperand2) } // NOR, ALUctl = 1100
-  }
+  // Branch address adder
+  pc_BranchAddrCalc := pc_register + immediate
   
   
   // MEMORY:
@@ -181,17 +176,18 @@ class Datapath extends Module {
   // Outputs for testing:
   
   io.instructionOut := instruction // Fetched instruction
+  io.immediateOut := immediate // Calculated immediate
   // Instructions in instruction memory
-  io.instruction1Out := instructionMemory(UInt(2))
-  io.instruction2Out := instructionMemory(UInt(3))
-  io.instruction3Out := instructionMemory(UInt(4))
-  io.instruction4Out := instructionMemory(UInt(5))
-  io.instruction5Out := instructionMemory(UInt(6))
-  io.instruction6Out := instructionMemory(UInt(7))
-  io.instruction7Out := instructionMemory(UInt(8))
-  io.instruction8Out := instructionMemory(UInt(9))
-  io.instruction9Out := instructionMemory(UInt(10))
-  io.instruction10Out := instructionMemory(UInt(11))
+  io.instruction0Out := instructionMemory(UInt(0))
+  io.instruction1Out := instructionMemory(UInt(1))
+  io.instruction2Out := instructionMemory(UInt(2))
+  io.instruction3Out := instructionMemory(UInt(3))
+  io.instruction4Out := instructionMemory(UInt(4))
+  io.instruction5Out := instructionMemory(UInt(5))
+  io.instruction6Out := instructionMemory(UInt(6))
+  io.instruction7Out := instructionMemory(UInt(7))
+  io.instruction8Out := instructionMemory(UInt(8))
+  io.instruction9Out := instructionMemory(UInt(9))
   // Register file values
   io.register0Out := registerFile(UInt(0))
   io.register1Out := registerFile(UInt(1))
@@ -209,10 +205,10 @@ class Datapath extends Module {
 
 
 // Generate the Verilog code by invoking chiselMain() in our main()
-object Main {
-  def main(args: Array[String]): Unit = {
-    println("Generating the hardware")
-    chiselMain(Array("--backend", "v", "--targetDir", "generated"),
-      () => Module(new Datapath()))
-  }
-}
+//object Main {
+//  def main(args: Array[String]): Unit = {
+//    println("Generating the hardware")
+//    chiselMain(Array("--backend", "v", "--targetDir", "generated"),
+//      () => Module(new Datapath()))
+//  }
+//}
