@@ -7,15 +7,17 @@ import Constants._
 class Top extends Module {
   
   val io = new Bundle {
-    // The CPU itself does not have inputs or outputs
+    
   }
   val control = Module(new Control())
   val datapath = Module(new Datapath())
   
+  // Control input to datapath output:
   control.io.ControlOpcode <> datapath.io.ControlOpcode
   control.io.ALUzero <> datapath.io.ALUzero
   control.io.ALUcontrol <> datapath.io.ALUcontrol
   
+  // Control output to datapath input:
   control.io.ALUctl <> datapath.io.ALUctl
   control.io.PCSrc <> datapath.io.PCSrc
   control.io.ALUSrc <> datapath.io.ALUSrc
