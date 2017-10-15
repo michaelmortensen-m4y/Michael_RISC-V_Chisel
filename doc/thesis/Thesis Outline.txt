@@ -38,7 +38,7 @@
 - Performance analysis
 	- Overview and Methodology
 	- Benchmark Testing
-		- FIR Filter
+		- Quicksort
 		- Matrix Multiplication
 - Discussion
 - Conclusion and Future Work
