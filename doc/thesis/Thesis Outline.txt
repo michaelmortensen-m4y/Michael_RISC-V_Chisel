@@ -1,0 +1,48 @@
+
+
+- Summary (English)
+- Summary (Danish)
+- Preface
+- Acknowledgements
+(- Contents)
+- Introduction
+	- Project plan
+- Background
+	- RISC-V in Embedded Systems and IoT
+	- The RISC-V Instruction Set Architecture
+		- ISA Variants
+		- Standard Extensions
+	- The RISC-V 5-stage Pipelined Processor
+	- FPGA Technology
+	- Hardware Design Flow
+	- The Altera DE2-115 FPGA
+		- General Overview
+		- Integration of a RISC-V Core
+- Design and Implementation
+	- General Overview
+	- Datapath
+		- Instruction Fetch
+		- Instruction Decode
+		- Execution
+		- Data Memory and Write Back
+	- Control Logic
+		- Main Control Logic
+		- Hazard Detection Logic
+		- Forwarding Logic
+	- Chisel Testing and Simulation
+	- Hardware Implementation
+	- Ressource Utilization
+	- Ressource Optimizations
+		- Control
+		- Datapath
+- Performance analysis
+	- Overview and Methodology
+	- Benchmark Testing
+		- FIR Filter
+		- Matrix Multiplication
+- Discussion
+- Conclusion and Future Work
+- Appendix A: RISC-V Single-cycle Processor Overview and Chisel Description
+- Appendix B: RISC-V Pipelined Processor Chisel Description
+- Appendix C: [Benchmarks C-code]
+- Bibliography
